@@ -4,25 +4,70 @@ import com.epam.rd.autotasks.sprintplanning.tickets.Bug;
 import com.epam.rd.autotasks.sprintplanning.tickets.Ticket;
 import com.epam.rd.autotasks.sprintplanning.tickets.UserStory;
 
+import java.util.Arrays;
+
 public class Sprint {
+    private final int capacity;
+    private final int ticketsLimit;
+    private int ticketCount;
+    private int currCapacity;
+
+    private Ticket[] tickets;
 
     public Sprint(int capacity, int ticketsLimit) {
-        throw new UnsupportedOperationException("Implement this method");
+        this.capacity = capacity;
+        this.ticketsLimit = ticketsLimit;
+        tickets = new Ticket[0];
     }
 
     public boolean addUserStory(UserStory userStory) {
-        throw new UnsupportedOperationException("Implement this method");
+        if (userStory != null && storyCont(userStory.getDependencies()) &&
+                !userStory.isCompleted() && ticketCount < ticketsLimit &&
+                currCapacity + userStory.getEstimate() <= capacity) {
+
+            tickets = Arrays.copyOf(tickets, ticketCount + 1);
+            tickets[ticketCount++] = userStory;
+
+            currCapacity += userStory.getEstimate();
+            return true;
+        }
+        return false;
     }
 
     public boolean addBug(Bug bugReport) {
-        throw new UnsupportedOperationException("Implement this method");
+        if (bugReport != null &&
+                !bugReport.isCompleted() && ticketCount + 1 <= ticketsLimit &&
+                currCapacity + bugReport.getEstimate() <= capacity) {
+
+            this.tickets = Arrays.copyOf(this.tickets, ticketCount + 1);
+            currCapacity += bugReport.getEstimate();
+            this.tickets[ticketCount++] = bugReport;
+            return true;
+
+        }
+        return false;
     }
 
     public Ticket[] getTickets() {
-        throw new UnsupportedOperationException("Implement this method");
+        return Arrays.copyOf(tickets, tickets.length);
     }
 
     public int getTotalEstimate() {
-        throw new UnsupportedOperationException("Implement this method");
+        return currCapacity;
+    }
+
+    private boolean storyCont(UserStory[] userStory) {
+        for (UserStory story : userStory) {
+            boolean isCont = false;
+            for (Ticket ticket :
+                    tickets) {
+                if (story.equals(ticket)) {
+                    isCont = true;
+                    break;
+                }
+            }
+            if (!isCont) return false;
+        }
+        return true;
     }
 }
